@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<labeler>
+    <xslt>
+        <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+            <xsl:output method="xml" indent="yes"/>
+            <xsl:template match="/">
+                <SourceFile>
+                    <xsl:apply-templates select="//stmt"/>
+                </SourceFile>
+            </xsl:template>
+
+            <xsl:template match="stmt">
+                <xsl:variable name="apos">'</xsl:variable>
+                <xsl:variable name="route"
+                              select="translate(./simple_stmt/small_stmt/testlist_star_expr/testlist/test/logical_test/comparison/expr/trailer/arguments/arglist/argument/test/logical_test/comparison/expr/atom/STRING/@Value,$apos,'')"/>
+                <xsl:variable name="handler"
+                              select="./simple_stmt/small_stmt/testlist_star_expr/testlist/test/logical_test/comparison/expr/trailer/arguments/arglist/argument/test/logical_test/comparison/expr/atom/name/NAME/@Value"/>
+
+                <xsl:for-each select="//compound_stmt">
+                    <xsl:variable name="line" select=".//classdef/name/NAME/@StartLine"/>
+                    <xsl:variable name="col" select=".//classdef/name/NAME/@StartColumn"/>
+                    <xsl:variable name="class" select=".//classdef/name/NAME/@Value"/>
+                    <xsl:variable name="method" select=".//classdef/suite/stmt/compound_stmt/funcdef/name/NAME/@Value"/>
+
+                    <xsl:for-each select="$method">
+
+                        <xsl:variable name="func" select=".//classdef/name/NAME/@Value"/>
+                        <xsl:variable name="methodCount"
+                                      select="count(//compound_stmt//funcdef/name/NAME[@Value = $handler])"/>
+                        <xsl:if test="$class=$handler">
+                            <api>
+                                <framework_name>Flask Restful</framework_name>
+                                <route>
+                                    <xsl:value-of select="$route"/>
+                                </route>
+                                <handler>
+                                    <xsl:value-of select="$handler"/>
+                                </handler>
+                                <startline>
+                                    <xsl:value-of select="$line"/>
+                                </startline>
+                                <startcolumn>
+                                    <xsl:value-of select="$col"/>
+                                </startcolumn>
+                                <http_method>
+                                    <xsl:value-of select="."/>
+                                </http_method>
+                            </api>
+
+                        </xsl:if>
+                    </xsl:for-each>
+                </xsl:for-each>
+            </xsl:template>
+        </xsl:stylesheet>
+    </xslt>
+
+    <id>Flask_RESTful</id>
+
+    <conditions>
+        <import>flask_restful.Api</import>
+    </conditions>
+</labeler>
