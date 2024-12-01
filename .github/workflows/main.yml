@@ -13,7 +13,6 @@ jobs:
   comment:
     runs-on: ubuntu-latest
     env:
-      PR_BRANCH: ${{ github.head_ref }}
       MAIN_BRANCH: main
       COMMENT_EXISTS: false
       CHANGES_FOUND: false
@@ -21,16 +20,24 @@ jobs:
     steps:
       - name: Check out the PR branch
         uses: actions/checkout@v4
-      
-      - name: Fetch the latest main branch
-        run: git fetch origin main:main
+        with:
+          fetch-depth: 2 # Ensure sufficient commit history for diffing
 
-      - name: Check for changes in specific directory
+      - name: Fetch the base branch
+        run: git fetch origin ${{ env.MAIN_BRANCH }}
+
+      - name: Check for changes in specific directories
         run: |
-          if git diff --name-only main | grep -q '
-          ^Python/'; then
+          # Space-separated list of directories to monitor
+          DIRECTORIES="Python/"
+
+          # Check for changes in any of the directories
+          if git diff --name-only origin/${{ env.MAIN_BRANCH }} HEAD -- $DIRECTORIES | grep -q .; then
             echo "CHANGES_FOUND=true" >> $GITHUB_ENV
           fi
+
+      - name: Debug CHANGES_FOUND
+        run: echo "CHANGES_FOUND=$CHANGES_FOUND"
 
       - name: Check if comment already exists
         id: comment_check
@@ -39,13 +46,12 @@ jobs:
         with:
           script: |
             const { data: comments } = await github.rest.issues.listComments({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
             });
-            console.log("Fetched comments:", comments);
             const commentExists = comments.some(comment =>
-            comment.body.includes("Changes were made in the extractors directories, please bump soft revision if needed")
+              comment.body.includes("Changes were made in the monitored directories, please bump soft revision if needed")
             );
             core.setOutput("comment_exists", commentExists);
 
@@ -65,5 +71,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: "Changes were made in the extractors directories, please bump soft revision if needed"
+              body: "Changes were made in the monitored directories, please bump soft revision if needed"
             })
