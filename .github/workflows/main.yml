@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PR_BRANCH: ${{ github.head_ref }}
-      MAIN_BRANCH: dev
+      MAIN_BRANCH: main
       COMMENT_EXISTS: false
       CHANGES_FOUND: false
 
