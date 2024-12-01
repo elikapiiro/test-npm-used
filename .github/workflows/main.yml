@@ -46,12 +46,12 @@ jobs:
         with:
           script: |
             const { data: comments } = await github.rest.issues.listComments({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
             });
             const commentExists = comments.some(comment =>
-              comment.body.includes("Changes were made in the monitored directories, please bump soft revision if needed")
+            comment.body.includes("Changes were made in the extractors directories, please bump soft revision if needed")
             );
             core.setOutput("comment_exists", commentExists);
 
