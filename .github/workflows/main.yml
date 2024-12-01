@@ -43,6 +43,7 @@ jobs:
             owner: context.repo.owner,
             repo: context.repo.repo,
             });
+            console.log("Fetched comments:", comments);
             const commentExists = comments.some(comment =>
             comment.body.includes("Changes were made in the extractors directories, please bump soft revision if needed")
             );
