@@ -45,7 +45,7 @@ jobs:
 
       - name: Check if comment already exists
         id: comment_check
-        if: steps.team_check.outputs.team_assigned == 'true' && env.changes_found == 'true'
+        if: env.changes_found == 'true'
         uses: actions/github-script@v6
         with:
           script: |
