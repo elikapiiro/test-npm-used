@@ -50,7 +50,7 @@ jobs:
 
       - name: Update COMMENT_EXISTS environment variable
         if: env.CHANGES_FOUND == 'true'
-        run: echo "COMMENT_EXISTS=$(steps.comment_check.outputs.comment_exists)" >> $GITHUB_ENV
+        run: echo "COMMENT_EXISTS=${{ steps.comment_check.outputs.comment_exists }}" >> $GITHUB_ENV
 
       - name: Debug comment check
         run: echo "COMMENT_EXISTS=$COMMENT_EXISTS"
