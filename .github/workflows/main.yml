@@ -21,6 +21,9 @@ jobs:
     steps:
       - name: Check out the PR branch
         uses: actions/checkout@v4
+      
+      - name: Fetch the latest main branch
+        run: git fetch origin main:main
 
       - name: Check for changes in specific directory
         run: |
