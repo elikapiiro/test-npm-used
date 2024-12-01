@@ -32,19 +32,6 @@ jobs:
       - name: Debug changes_found
         run: echo "changes_found=$changes_found"
 
-      - name: Check if specific team is assigned
-        id: team_check
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const { data: reviews } = await github.rest.pulls.listRequestedReviewers({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number,
-            });
-            const teamAssigned = reviews.teams.some(team => team.name === 'specific-team');
-            core.setOutput("team_assigned", teamAssigned);
-
       - name: Debug comments
         uses: actions/github-script@v6
         with:
@@ -71,7 +58,7 @@ jobs:
             core.setOutput("comment_exists", commentExists);
 
       - name: Comment on PR
-        if: env.changes_found == 'true' && steps.team_check.outputs.team_assigned == 'true' && steps.comment_check.outputs.comment_exists == 'false'
+        if: env.changes_found == 'true' && steps.comment_check.outputs.comment_exists == 'false'
         uses: actions/github-script@v6
         with:
           script: |
