@@ -1,4 +1,7 @@
 name: Comment on PR if Specific Directory Changes and Team Assigned
+permissions:
+  issues: write
+  pull-requests: write
 
 on:
   pull_request:
