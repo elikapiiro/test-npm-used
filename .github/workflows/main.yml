@@ -3,7 +3,7 @@ name: Reminder to bump soft revision
 on:
   pull_request:
     branches:
-      - dev
+      - main
     paths:
       - Python/**.py
     types: [opened, synchronize, review_requested]
