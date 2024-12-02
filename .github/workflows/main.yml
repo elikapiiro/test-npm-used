@@ -2,6 +2,10 @@ name: Reminder to bump soft revision
 
 on:
   pull_request:
+    branches:
+      - dev
+    paths:
+      - Python/**.py
     types: [opened, synchronize, review_requested]
 
 permissions:
@@ -12,57 +16,26 @@ jobs:
   comment:
     runs-on: ubuntu-latest
     env:
-      MAIN_BRANCH: main
       COMMENT_EXISTS: false
-      CHANGES_FOUND: false
 
     steps:
-      - name: Check out the PR branch
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2 # Ensure sufficient commit history for diffing
-
-      - name: Fetch the base branch
-        run: git fetch origin ${{ env.MAIN_BRANCH }}
-
-      - name: Check for changes in specific directories
-        run: |
-          # Space-separated list of directories to monitor
-          DIRECTORIES="Python/"
-
-          # Check for changes in any of the directories
-          if git diff --name-only origin/${{ env.MAIN_BRANCH }} HEAD -- $DIRECTORIES | grep -q .; then
-            echo "CHANGES_FOUND=true" >> $GITHUB_ENV
-          fi
-
-      - name: Debug CHANGES_FOUND
-        run: echo "CHANGES_FOUND=$CHANGES_FOUND"
-
-      - name: Check if comment already exists
+      - name: Check and update COMMENT_EXISTS
         id: comment_check
-        if: env.CHANGES_FOUND == 'true'
         uses: actions/github-script@v6
         with:
           script: |
             const { data: comments } = await github.rest.issues.listComments({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
             });
             const commentExists = comments.some(comment =>
-            comment.body.includes("Changes were made in the extractors directories, please bump soft revision if needed")
+              comment.body.includes("Changes were made in the extractors directories, please bump soft revision if needed")
             );
-            core.setOutput("comment_exists", commentExists);
-
-      - name: Update COMMENT_EXISTS environment variable
-        if: env.CHANGES_FOUND == 'true'
-        run: echo "COMMENT_EXISTS=${{ steps.comment_check.outputs.comment_exists }}" >> $GITHUB_ENV
-
-      - name: Debug comment check
-        run: echo "COMMENT_EXISTS=$COMMENT_EXISTS"
+            core.exportVariable("COMMENT_EXISTS", commentExists);
 
       - name: Comment on PR
-        if: env.CHANGES_FOUND == 'true' && env.COMMENT_EXISTS == 'false'
+        if: env.COMMENT_EXISTS == 'false'
         uses: actions/github-script@v6
         with:
           script: |
@@ -70,5 +43,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: "Changes were made in the monitored directories, please bump soft revision if needed"
+              body: "Changes were made in the extractors directories, please bump soft revision if needed"
             })
